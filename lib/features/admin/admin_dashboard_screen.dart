@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:aura_influencer_portfolio/theme/aura_theme.dart';
-import 'package:aura_influencer_portfolio/utils/mock_data.dart';
+import 'package:aura_influencer_portfolio/shared/utils/mock_data.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});

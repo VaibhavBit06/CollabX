@@ -1,38 +1,38 @@
 import 'package:flutter/material.dart';
 
-import 'package:aura_influencer_portfolio/features/home/splash_screen.dart';
-import 'package:aura_influencer_portfolio/features/home/portfolio_intro_screen.dart';
-import 'package:aura_influencer_portfolio/features/auth/auth_welcome_screen.dart';
-import 'package:aura_influencer_portfolio/features/auth/login_screen.dart';
-import 'package:aura_influencer_portfolio/features/auth/sign_up_screen.dart';
-import 'package:aura_influencer_portfolio/features/auth/forgot_password_screen.dart';
-import 'package:aura_influencer_portfolio/features/auth/creator_type_selection_screen.dart';
-import 'package:aura_influencer_portfolio/features/auth/basic_profile_setup_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/home/splash_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/home/portfolio_intro_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/auth/auth_welcome_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/auth/login_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/auth/sign_up_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/auth/forgot_password_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/auth/creator_type_selection_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/auth/basic_profile_setup_screen.dart';
 
-import 'package:aura_influencer_portfolio/features/home/home_dashboard_screen.dart';
-import 'package:aura_influencer_portfolio/features/marketplace/deals_inbox_screen.dart';
-import 'package:aura_influencer_portfolio/features/marketplace/deal_chat_screen.dart';
-import 'package:aura_influencer_portfolio/features/settings/settings_screen.dart';
-import 'package:aura_influencer_portfolio/features/settings/account_security_screen.dart';
-import 'package:aura_influencer_portfolio/features/finance/payout_methods_screen.dart';
-import 'package:aura_influencer_portfolio/features/marketplace/deal_details_screen.dart';
-import 'package:aura_influencer_portfolio/features/analytics/engagement_rate_screen.dart';
-import 'package:aura_influencer_portfolio/features/analytics/platform_growth_screen.dart';
-import 'package:aura_influencer_portfolio/features/analytics/weekly_snapshot_screen.dart';
-import 'package:aura_influencer_portfolio/features/campaigns/campaign_brief_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/home/home_dashboard_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/marketplace/deals_inbox_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/marketplace/deal_chat_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/settings/settings_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/settings/account_security_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/finance/payout_methods_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/marketplace/deal_details_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/analytics/engagement_rate_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/analytics/platform_growth_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/analytics/weekly_snapshot_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/campaigns/campaign_brief_screen.dart';
 
-import 'package:aura_influencer_portfolio/features/support/help_support_screen.dart';
-import 'package:aura_influencer_portfolio/features/settings/social_links_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/support/help_support_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/settings/social_links_screen.dart';
 
-import 'package:aura_influencer_portfolio/features/profile/profile_bento_screen.dart';
-import 'package:aura_influencer_portfolio/features/marketplace/brand_marketplace_screen.dart';
-import 'package:aura_influencer_portfolio/features/campaigns/campaign_apply_screen.dart';
-import 'package:aura_influencer_portfolio/features/finance/wallet_screen.dart';
-import 'package:aura_influencer_portfolio/features/finance/withdraw_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/profile/profile_bento_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/marketplace/brand_marketplace_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/campaigns/campaign_apply_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/finance/wallet_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/finance/withdraw_screen.dart';
 import 'package:aura_influencer_portfolio/features/admin/admin_dashboard_screen.dart';
-import 'package:aura_influencer_portfolio/features/settings/personal_details_screen.dart';
-import 'package:aura_influencer_portfolio/features/settings/theme_selection_screen.dart';
-import 'package:aura_influencer_portfolio/utils/constants.dart';
+import 'package:aura_influencer_portfolio/features/creator/settings/personal_details_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/settings/theme_selection_screen.dart';
+import 'package:aura_influencer_portfolio/shared/utils/constants.dart';
 
 class AppRoutes {
   static const String splash = '/';
