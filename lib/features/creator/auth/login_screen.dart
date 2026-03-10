@@ -147,12 +147,22 @@ class _PhoneLoginTabState extends State<_PhoneLoginTab> {
     setState(() {
       _loading = true;
     });
-    await AuthService.instance.signInWithPhone(phone: _phoneController.text);
-    if (!mounted) return;
-    setState(() {
-      _loading = false;
-    });
-    _routeByRole(context);
+    try {
+      await AuthService.instance.signInWithPhone(phone: _phoneController.text);
+      if (!mounted) return;
+      _routeByRole(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Phone login failed: ${e.toString().replaceAll('Exception: ', '')}')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -214,23 +224,7 @@ class _PhoneLoginTabState extends State<_PhoneLoginTab> {
             text: "Can't access this number?",
             onTap: () => Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
           ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AuraColors.obsidian.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AuraColors.textPrimary.withOpacity(0.06)),
-            ),
-            child: Text(
-              'No backend: any phone + any 6-digit OTP → Creator Home.',
-              style: TextStyle(
-                fontSize: 10,
-                height: 1.4,
-                color: AuraColors.chrome.withOpacity(0.6),
-              ),
-            ),
-          ),
+
           const SizedBox(height: 24),
           // Sign up link
           _AuthFooterLink(
@@ -268,12 +262,22 @@ class _EmailLoginTabState extends State<_EmailLoginTab> {
     setState(() {
       _loading = true;
     });
-    await AuthService.instance.signIn(email: email, password: password);
-    if (!mounted) return;
-    setState(() {
-      _loading = false;
-    });
-    _routeByRole(context);
+    try {
+      await AuthService.instance.signIn(email: email, password: password);
+      if (!mounted) return;
+      _routeByRole(context);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: ${e.toString().replaceAll('Exception: ', '').replaceAll('[firebase_auth/invalid-credential] ', '')}')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -311,30 +315,19 @@ class _EmailLoginTabState extends State<_EmailLoginTab> {
             loading: _loading,
             onPressed: _login,
           ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AuraColors.obsidian.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AuraColors.textPrimary.withOpacity(0.06)),
-            ),
-            child: Text(
-              'No backend: use any email + password.\n'
-              'Email containing "admin" → Admin Panel; else → Creator Home.',
-              style: TextStyle(
-                fontSize: 10,
-                height: 1.4,
-                color: AuraColors.chrome.withOpacity(0.6),
-              ),
-            ),
-          ),
+
           const SizedBox(height: 24),
           // Sign up link
           _AuthFooterLink(
             question: "Don't have an account?",
             actionText: 'Sign Up',
             onTap: () => Navigator.of(context).pushReplacementNamed(AppRoutes.signUp),
+          ),
+          const SizedBox(height: 12),
+          _AuthFooterLink(
+            question: 'Are you a Brand?',
+            actionText: 'Register here',
+            onTap: () => Navigator.of(context).pushReplacementNamed(AppRoutes.brandSignUp),
           ),
         ],
       ),
@@ -348,6 +341,11 @@ void _routeByRole(BuildContext context) {
   if (user.role == UserRole.admin) {
     Navigator.of(context).pushNamedAndRemoveUntil(
       AppRoutes.adminDashboard,
+      (Route<dynamic> route) => false,
+    );
+  } else if (user.role == UserRole.brand) {
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.brandDashboard,
       (Route<dynamic> route) => false,
     );
   } else {

@@ -11,19 +11,14 @@ class WalletScreen extends StatefulWidget {
   State<WalletScreen> createState() => _WalletScreenState();
 }
 
-class _WalletScreenState extends State<WalletScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
+class _WalletScreenState extends State<WalletScreen> {
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     super.dispose();
   }
 
@@ -38,22 +33,36 @@ class _WalletScreenState extends State<WalletScreen>
             const SizedBox(height: 20),
             const _BalanceCard(),
             const SizedBox(height: 24),
-            _ActionRow(
-              onWithdraw: () =>
-                  Navigator.of(context).pushNamed(AppRoutes.withdraw),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: _WithdrawButton(
+                  onTap: () =>
+                      Navigator.of(context).pushNamed(AppRoutes.withdraw),
+                ),
+              ),
             ),
-            const SizedBox(height: 24),
-            _TabBar(controller: _tabController),
-            const SizedBox(height: 8),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: const <Widget>[
-                  _TransactionList(),
-                  _PendingList(),
+            const SizedBox(height: 28),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Text(
+                    'TRANSACTION HISTORY',
+                    style: TextStyle(
+                      fontSize: 10,
+                      letterSpacing: 3,
+                      fontWeight: FontWeight.w600,
+                      color: AuraColors.textPrimary.withOpacity(0.4),
+                    ),
+                  ),
                 ],
               ),
             ),
+            const SizedBox(height: 10),
+            const Expanded(child: _AllTransactionList()),
           ],
         ),
       ),
@@ -74,8 +83,7 @@ class _Header extends StatelessWidget {
         children: <Widget>[
           IconButton(
             onPressed: onBack,
-            icon:
-                Icon(Icons.arrow_back_ios_new, color: AuraColors.chrome),
+            icon: Icon(Icons.arrow_back_ios_new, color: AuraColors.chrome),
           ),
           Text(
             'Wallet',
@@ -89,7 +97,8 @@ class _Header extends StatelessWidget {
           IconButton(
             onPressed: () =>
                 Navigator.of(context).pushNamed(AppRoutes.payoutMethods),
-            icon: Icon(Icons.tune, color: AuraColors.textPrimary.withOpacity(0.6)),
+            icon: Icon(Icons.tune,
+                color: AuraColors.textPrimary.withOpacity(0.6)),
           ),
         ],
       ),
@@ -168,14 +177,16 @@ class _BalanceCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Container(height: 1, color: AuraColors.textPrimary.withOpacity(0.08)),
+            Container(
+                height: 1, color: AuraColors.textPrimary.withOpacity(0.08)),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 _StatCol(label: 'Pending', value: MockWallet.pendingAmount),
                 _StatCol(label: 'Lifetime', value: MockWallet.lifetimeEarnings),
-                _StatCol(label: 'Campaigns', value: MockWallet.campaignsCompleted),
+                _StatCol(
+                    label: 'Campaigns', value: MockWallet.campaignsCompleted),
               ],
             ),
           ],
@@ -217,63 +228,10 @@ class _StatCol extends StatelessWidget {
   }
 }
 
-class _ActionRow extends StatelessWidget {
-  const _ActionRow({required this.onWithdraw});
-  final VoidCallback onWithdraw;
+// ──────────────────────── Withdraw Button ────────────────────────
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: _ActionButton(
-              icon: Icons.arrow_upward,
-              label: 'Withdraw',
-              primary: true,
-              onTap: onWithdraw,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _ActionButton(
-              icon: Icons.history,
-              label: 'History',
-              primary: false,
-              onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Full history coming soon')),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: _ActionButton(
-              icon: Icons.receipt_long_outlined,
-              label: 'Invoices',
-              primary: false,
-              onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Invoices coming soon')),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.primary,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool primary;
+class _WithdrawButton extends StatelessWidget {
+  const _WithdrawButton({required this.onTap});
   final VoidCallback onTap;
 
   @override
@@ -281,28 +239,22 @@ class _ActionButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: primary ? AuraColors.sage : AuraColors.obsidian,
+          color: AuraColors.sage,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: primary ? AuraColors.sage : AuraColors.textPrimary.withOpacity(0.08),
-          ),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              icon,
-              color: primary ? AuraColors.midnight : AuraColors.textPrimary,
-              size: 20,
-            ),
-            const SizedBox(height: 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.arrow_upward, color: AuraColors.midnight, size: 20),
+            const SizedBox(width: 10),
             Text(
-              label,
+              'Withdraw',
               style: TextStyle(
-                fontSize: 11,
-                color: primary ? AuraColors.midnight : AuraColors.textPrimary.withOpacity(0.7),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AuraColors.midnight,
+                letterSpacing: 0.5,
               ),
             ),
           ],
@@ -312,91 +264,37 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-class _TabBar extends StatelessWidget {
-  const _TabBar({required this.controller});
-  final TabController controller;
+// ──────────────────────── Combined Transaction List ────────────────────────
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Container(
-        height: 40,
-        decoration: BoxDecoration(
-          color: AuraColors.obsidian,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AuraColors.textPrimary.withOpacity(0.05)),
-        ),
-        child: TabBar(
-          controller: controller,
-          indicator: BoxDecoration(
-            color: AuraColors.sage.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: AuraColors.sage.withOpacity(0.3)),
-          ),
-          labelColor: AuraColors.sage,
-          unselectedLabelColor: AuraColors.textPrimary.withOpacity(0.38),
-          labelStyle: const TextStyle(
-              fontSize: 11, letterSpacing: 1.5, fontWeight: FontWeight.w500),
-          dividerColor: Colors.transparent,
-          tabs: const <Tab>[
-            Tab(text: 'RECEIVED'),
-            Tab(text: 'PENDING'),
-          ],
-        ),
-      ),
-    );
-  }
-}
+class _AllTransactionList extends StatelessWidget {
+  const _AllTransactionList();
 
-// ──────────────────────── Transaction Lists ────────────────────────
-
-class _TransactionList extends StatelessWidget {
-  const _TransactionList();
-
-  static final List<_TxData> _txs = MockTransactions.history
-      .map((MockTransaction t) => _TxData(
-            brand: t.brand,
-            description: t.description,
-            amount: t.amount,
-            date: t.date,
-            status: t.status,
-            isCredit: t.isCredit,
-          ))
-      .toList();
+  static final List<_TxData> _all = [
+    ...MockTransactions.history.map((t) => _TxData(
+          brand: t.brand,
+          description: t.description,
+          amount: t.amount,
+          date: t.date,
+          status: t.status,
+          isCredit: t.isCredit,
+        )),
+    ...MockTransactions.pending.map((t) => _TxData(
+          brand: t.brand,
+          description: t.description,
+          amount: t.amount,
+          date: t.date,
+          status: t.status,
+          isCredit: t.isCredit,
+        )),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-      itemCount: _txs.length,
+      padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+      itemCount: _all.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, int i) => _TxCard(tx: _txs[i]),
-    );
-  }
-}
-
-class _PendingList extends StatelessWidget {
-  const _PendingList();
-
-  static final List<_TxData> _pending = MockTransactions.pending
-      .map((MockTransaction t) => _TxData(
-            brand: t.brand,
-            description: t.description,
-            amount: t.amount,
-            date: t.date,
-            status: t.status,
-            isCredit: t.isCredit,
-          ))
-      .toList();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-      itemCount: _pending.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, int i) => _TxCard(tx: _pending[i]),
+      itemBuilder: (_, int i) => _TxCard(tx: _all[i]),
     );
   }
 }
@@ -407,7 +305,9 @@ class _TxCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color amountColor = tx.isCredit ? AuraColors.sage : AuraColors.textPrimary.withOpacity(0.54);
+    final Color amountColor = tx.isCredit
+        ? AuraColors.sage
+        : AuraColors.textPrimary.withOpacity(0.54);
     final Color statusColor = tx.status == 'Received'
         ? AuraColors.sage.withOpacity(0.8)
         : tx.status == 'In Review'

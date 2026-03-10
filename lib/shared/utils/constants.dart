@@ -14,7 +14,7 @@ class AppConstants {
   static const double radiusPill = 999.0;
 }
 
-enum UserRole { creator, admin }
+enum UserRole { creator, brand, admin }
 
 enum CreatorType {
   collegeStudent,

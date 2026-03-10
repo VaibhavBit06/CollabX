@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:aura_influencer_portfolio/theme/aura_theme.dart';
 import 'package:aura_influencer_portfolio/shared/utils/mock_data.dart';
+import 'package:aura_influencer_portfolio/shared/chat_store.dart';
 
 class DealChatScreen extends StatefulWidget {
   const DealChatScreen({super.key});
@@ -11,11 +13,31 @@ class DealChatScreen extends StatefulWidget {
 }
 
 class _DealChatScreenState extends State<DealChatScreen> {
-  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _ctrl = TextEditingController();
+  final ScrollController _scroll = ScrollController();
+
+  void _send() {
+    final text = _ctrl.text.trim();
+    if (text.isEmpty) return;
+    HapticFeedback.lightImpact();
+    ChatStore.instance.send(text, ChatSender.creator);
+    _ctrl.clear();
+    // Scroll to bottom after state rebuild
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scroll.hasClients) {
+        _scroll.animateTo(
+          _scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
 
   @override
   void dispose() {
-    _messageController.dispose();
+    _ctrl.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -28,14 +50,43 @@ class _DealChatScreenState extends State<DealChatScreen> {
           children: <Widget>[
             const _ChatHeader(),
             const _OfferSummary(),
-            const Expanded(child: _Messages()),
-            _Composer(controller: _messageController),
+            Expanded(
+              child: ValueListenableBuilder<List<ChatMessage>>(
+                valueListenable: ChatStore.instance.messages,
+                builder: (_, messages, __) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (_scroll.hasClients) {
+                      _scroll.animateTo(
+                        _scroll.position.maxScrollExtent,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeOut,
+                      );
+                    }
+                  });
+                  return ListView.builder(
+                    controller: _scroll,
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    itemCount: messages.length,
+                    itemBuilder: (_, int i) {
+                      final msg = messages[i];
+                      final isCreator = msg.sender == ChatSender.creator;
+                      return isCreator
+                          ? _UserBubble(text: msg.text, time: msg.timestamp)
+                          : _BrandBubble(text: msg.text, time: msg.timestamp);
+                    },
+                  );
+                },
+              ),
+            ),
+            _Composer(controller: _ctrl, onSend: _send),
           ],
         ),
       ),
     );
   }
 }
+
+// ── Header ──────────────────────────────────────────────────────────────────
 
 class _ChatHeader extends StatelessWidget {
   const _ChatHeader();
@@ -61,13 +112,13 @@ class _ChatHeader extends StatelessWidget {
             children: <Widget>[
               Text(
                 MockDealChat.brandName,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 11,
                   letterSpacing: 3,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Text(
                 MockDealChat.status,
                 style: TextStyle(
@@ -87,6 +138,8 @@ class _ChatHeader extends StatelessWidget {
     );
   }
 }
+
+// ── Offer Summary Banner ─────────────────────────────────────────────────────
 
 class _OfferSummary extends StatelessWidget {
   const _OfferSummary();
@@ -112,8 +165,10 @@ class _OfferSummary extends StatelessWidget {
                   height: 40,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    color: AuraColors.textPrimary.withOpacity(0.1),
+                    color: AuraColors.sage.withOpacity(0.1),
                   ),
+                  child: Icon(Icons.handshake_outlined,
+                      size: 20, color: AuraColors.sage.withOpacity(0.6)),
                 ),
                 const SizedBox(width: 12),
                 Column(
@@ -129,10 +184,8 @@ class _OfferSummary extends StatelessWidget {
                     ),
                     const Text(
                       MockDealChat.offerTitle,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w300,
-                      ),
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.w300),
                     ),
                   ],
                 ),
@@ -140,21 +193,15 @@ class _OfferSummary extends StatelessWidget {
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
-              children: const <Widget>[
-                Text(
+              children: <Widget>[
+                const Text(
                   MockDealChat.offerAmount,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w300,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
                 ),
                 Text(
                   MockDealChat.offerType,
-                  style: TextStyle(
-                    fontSize: 9,
-                    letterSpacing: 1.5,
-                    color: AuraColors.sage,
-                  ),
+                  style: const TextStyle(
+                      fontSize: 9, letterSpacing: 1.5, color: AuraColors.sage),
                 ),
               ],
             ),
@@ -165,76 +212,52 @@ class _OfferSummary extends StatelessWidget {
   }
 }
 
-class _Messages extends StatelessWidget {
-  const _Messages();
+// ── Bubbles ───────────────────────────────────────────────────────────────────
 
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
-      children: const <Widget>[
-        _Timestamp(MockDealChat.timestamp),
-        _BrandBubble(
-          text: MockDealChat.msg1,
-        ),
-        _UserBubble(
-          text: MockDealChat.msg2,
-        ),
-        _BrandBubble(
-          text: MockDealChat.msg3,
-        ),
-      ],
-    );
-  }
-}
-
-class _Timestamp extends StatelessWidget {
-  const _Timestamp(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Center(
-        child: Text(
-          label.toUpperCase(),
-          style: TextStyle(
-            fontSize: 9,
-            letterSpacing: 3,
-            color: AuraColors.textPrimary.withOpacity(0.3),
-          ),
-        ),
-      ),
-    );
-  }
+String _fmt(DateTime t) {
+  final h = t.hour.toString().padLeft(2, '0');
+  final m = t.minute.toString().padLeft(2, '0');
+  return '$h:$m';
 }
 
 class _BrandBubble extends StatelessWidget {
-  const _BrandBubble({required this.text});
-
+  const _BrandBubble({required this.text, required this.time});
   final String text;
+  final DateTime time;
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 320),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.72,
+        ),
         child: Container(
           margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
           decoration: BoxDecoration(
             color: AuraColors.obsidian,
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 13,
-              height: 1.4,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(4),
+              topRight: Radius.circular(18),
+              bottomLeft: Radius.circular(18),
+              bottomRight: Radius.circular(18),
             ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(text, style: const TextStyle(fontSize: 13, height: 1.4)),
+              const SizedBox(height: 4),
+              Text(
+                _fmt(time),
+                style: TextStyle(
+                  fontSize: 9,
+                  color: AuraColors.textPrimary.withOpacity(0.3),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -243,32 +266,52 @@ class _BrandBubble extends StatelessWidget {
 }
 
 class _UserBubble extends StatelessWidget {
-  const _UserBubble({required this.text});
-
+  const _UserBubble({required this.text, required this.time});
   final String text;
+  final DateTime time;
 
   @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerRight,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 320),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.72,
+        ),
         child: Container(
           margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
           decoration: BoxDecoration(
             color: AuraColors.sage.withOpacity(0.15),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: AuraColors.sage.withOpacity(0.2),
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(18),
+              topRight: Radius.circular(4),
+              bottomLeft: Radius.circular(18),
+              bottomRight: Radius.circular(18),
             ),
+            border: Border.all(color: AuraColors.sage.withOpacity(0.2)),
           ),
-          child: Text(
-            text,
-            style: const TextStyle(
-              fontSize: 13,
-              height: 1.4,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(text, style: const TextStyle(fontSize: 13, height: 1.4)),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _fmt(time),
+                    style: TextStyle(
+                      fontSize: 9,
+                      color: AuraColors.textPrimary.withOpacity(0.3),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.done_all,
+                      size: 11, color: AuraColors.sage.withOpacity(0.5)),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -276,10 +319,12 @@ class _UserBubble extends StatelessWidget {
   }
 }
 
-class _Composer extends StatelessWidget {
-  const _Composer({required this.controller});
+// ── Composer ─────────────────────────────────────────────────────────────────
 
+class _Composer extends StatelessWidget {
+  const _Composer({required this.controller, required this.onSend});
   final TextEditingController controller;
+  final VoidCallback onSend;
 
   @override
   Widget build(BuildContext context) {
@@ -293,35 +338,23 @@ class _Composer extends StatelessWidget {
       ),
       child: Row(
         children: <Widget>[
-          IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Attachment coming soon')),
-              );
-            },
-            icon: const Icon(Icons.add_circle_outline, color: AuraColors.sage),
-          ),
+          const SizedBox(width: 4),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 color: AuraColors.obsidian,
                 borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AuraColors.textPrimary.withOpacity(0.08)),
+                border:
+                    Border.all(color: AuraColors.textPrimary.withOpacity(0.08)),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: TextField(
                 controller: controller,
                 style: TextStyle(fontSize: 13, color: AuraColors.textPrimary),
-                maxLines: 1,
+                maxLines: 4,
+                minLines: 1,
                 textInputAction: TextInputAction.send,
-                onSubmitted: (String value) {
-                  if (value.trim().isNotEmpty) {
-                    controller.clear();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Message sent!')),
-                    );
-                  }
-                },
+                onSubmitted: (_) => onSend(),
                 decoration: InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Message...',
@@ -333,18 +366,21 @@ class _Composer extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
-            onPressed: () {
-              final String text = controller.text.trim();
-              if (text.isNotEmpty) {
-                controller.clear();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Message sent!')),
-                );
-              }
-            },
-            icon: const Icon(Icons.send, color: AuraColors.sage),
+          const SizedBox(width: 4),
+          GestureDetector(
+            onTap: onSend,
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AuraColors.sage,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.send_rounded,
+                  size: 18, color: AuraColors.midnight),
+            ),
           ),
+          const SizedBox(width: 4),
         ],
       ),
     );

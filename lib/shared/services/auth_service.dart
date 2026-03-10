@@ -1,73 +1,77 @@
 // lib/services/auth_service.dart
+// MOCK MODE — no Firebase dependency. Swap back to real Firebase later.
 import '../models/user.dart';
 import '../utils/constants.dart';
 
-/// Stub that mimics Firebase Auth. Replace with real Firebase when ready.
+/// Mock AuthService for local testing without Firebase.
+/// All sign-in / sign-up calls succeed instantly with a fake user.
 class AuthService {
   AuthService._privateConstructor();
   static final AuthService instance = AuthService._privateConstructor();
 
   MockUser? _currentUser;
-
-  /// Sync access for routing after sign-in (e.g. from login screen).
   MockUser? get currentUser => _currentUser;
 
-  /// Email sign-in. Role from email: contains "admin" → admin, else → creator.
+  /// Simulate email sign-in.
   Future<void> signIn({
     required String email,
     required String password,
   }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 800));
-    final role = email.toLowerCase().contains('admin')
-        ? UserRole.admin
-        : UserRole.creator;
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     _currentUser = MockUser(
-      uid: 'uid_${DateTime.now().millisecondsSinceEpoch}',
+      uid: 'mock-uid-001',
       email: email,
-      role: role,
+      role: _roleFromEmail(email),
     );
   }
 
-  /// Phone OTP sign-in. Creators only (admin uses email).
+  /// Simulate phone sign-in.
   Future<void> signInWithPhone({required String phone}) async {
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     _currentUser = MockUser(
-      uid: 'phone_${DateTime.now().millisecondsSinceEpoch}',
+      uid: 'mock-uid-phone',
       email: phone,
       role: UserRole.creator,
     );
   }
 
-  /// Sign up with email. Creates creator role only.
+  /// Simulate sign-up.
   Future<void> signUp({
     required String email,
     required String password,
+    UserRole defaultRole = UserRole.creator,
   }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     _currentUser = MockUser(
-      uid: 'uid_${DateTime.now().millisecondsSinceEpoch}',
+      uid: 'mock-uid-new',
       email: email,
-      role: UserRole.creator,
+      role: defaultRole,
     );
   }
 
-  /// Sign up with phone OTP. Creates creator role only.
+  /// Simulate phone sign-up.
   Future<void> signUpWithPhone({required String phone}) async {
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     _currentUser = MockUser(
-      uid: 'phone_${DateTime.now().millisecondsSinceEpoch}',
+      uid: 'mock-uid-phone-new',
       email: phone,
       role: UserRole.creator,
     );
   }
 
   Future<void> signOut() async {
-    await Future<void>.delayed(const Duration(milliseconds: 300));
     _currentUser = null;
   }
 
   Future<MockUser?> getCurrentUser() async {
-    await Future<void>.delayed(const Duration(milliseconds: 400));
     return _currentUser;
+  }
+
+  /// Helper: if the email contains "admin" → admin, "brand" → brand, else creator.
+  UserRole _roleFromEmail(String email) {
+    final lower = email.toLowerCase();
+    if (lower.contains('admin')) return UserRole.admin;
+    if (lower.contains('brand')) return UserRole.brand;
+    return UserRole.creator;
   }
 }

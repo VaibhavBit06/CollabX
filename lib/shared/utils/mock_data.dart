@@ -10,6 +10,8 @@ class MockCampaign {
     required this.minFollowers,
     required this.niches,
     required this.isHot,
+    required this.targetColleges,
+    required this.targetCities,
   });
 
   final String brand;
@@ -20,6 +22,8 @@ class MockCampaign {
   final String minFollowers;
   final List<String> niches;
   final bool isHot;
+  final List<String> targetColleges;
+  final List<String> targetCities;
 }
 
 class MockCampaigns {
@@ -35,6 +39,8 @@ class MockCampaigns {
       minFollowers: '50K',
       niches: <String>['Luxury', 'Lifestyle'],
       isHot: true,
+      targetColleges: <String>['All'],
+      targetCities: <String>['Mumbai', 'Delhi'],
     ),
     MockCampaign(
       brand: 'Silas Studio',
@@ -45,6 +51,8 @@ class MockCampaigns {
       minFollowers: '30K',
       niches: <String>['Fashion', 'Editorial'],
       isHot: false,
+      targetColleges: <String>['NIFT', 'Pearl Academy'],
+      targetCities: <String>['All'],
     ),
     MockCampaign(
       brand: 'Velvet & Stone',
@@ -55,6 +63,8 @@ class MockCampaigns {
       minFollowers: '20K',
       niches: <String>['Interior', 'Minimalism'],
       isHot: false,
+      targetColleges: <String>['All'],
+      targetCities: <String>['All'],
     ),
     MockCampaign(
       brand: 'Le Voyage',
@@ -65,6 +75,8 @@ class MockCampaigns {
       minFollowers: '80K',
       niches: <String>['Travel', 'Luxury'],
       isHot: true,
+      targetColleges: <String>['All'],
+      targetCities: <String>['Bangalore'],
     ),
     MockCampaign(
       brand: 'Zenith Wellness',
@@ -75,6 +87,8 @@ class MockCampaigns {
       minFollowers: '15K',
       niches: <String>['Wellness', 'Authentic'],
       isHot: false,
+      targetColleges: <String>['All'],
+      targetCities: <String>['Mumbai', 'Pune'],
     ),
   ];
 }
@@ -297,6 +311,8 @@ class MockUser {
   static const String fullName = 'Sohail Khan';
   static const String handle = '@sohailcreates';
   static const String location = 'Mumbai, India';
+  static const String city = 'Mumbai';
+  static const String college = 'Mumbai University';
   static const String bio =
       'Lifestyle & fashion creator crafting cinematic stories. '
       'Collaborating with brands that value authenticity.';

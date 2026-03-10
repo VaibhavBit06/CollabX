@@ -267,14 +267,14 @@ class _AnalyticsBottomNav extends StatelessWidget {
             onTap: () {},
           ),
           _NavItem(
-            icon: Icons.forum_outlined,
-            label: 'Inbox',
+            icon: Icons.handshake_outlined,
+            label: 'Collabs',
             active: false,
             onTap: () => Navigator.of(context)
-                .pushReplacementNamed(AppRoutes.dealsInbox),
+                .pushReplacementNamed(AppRoutes.creatorCollaborations),
           ),
           _NavItem(
-            icon: Icons.account_circle_outlined,
+            icon: Icons.account_circle,
             label: 'Profile',
             active: false,
             onTap: () => Navigator.of(context)

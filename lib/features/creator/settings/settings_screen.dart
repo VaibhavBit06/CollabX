@@ -145,10 +145,7 @@ class _SettingsContent extends StatelessWidget {
                 icon: Icons.lock_outline,
                 label: 'Privacy',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Privacy settings coming soon')),
-                  );
+                  Navigator.of(context).pushNamed(AppRoutes.privacySettings);
                 },
               ),
               const _Divider(),
@@ -156,10 +153,8 @@ class _SettingsContent extends StatelessWidget {
                 icon: Icons.notifications_none,
                 label: 'Notifications',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Notification settings coming soon')),
-                  );
+                  Navigator.of(context)
+                      .pushNamed(AppRoutes.notificationSettings);
                 },
               ),
             ],
@@ -364,7 +359,7 @@ class _BottomNav extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           _NavItem(
-            icon: Icons.home,
+            icon: Icons.home_outlined,
             label: 'Home',
             active: false,
             onTap: () =>
@@ -378,17 +373,18 @@ class _BottomNav extends StatelessWidget {
                 .pushReplacementNamed(AppRoutes.brandMarketplace),
           ),
           _NavItem(
-            icon: Icons.forum_outlined,
-            label: 'Inbox',
+            icon: Icons.handshake_outlined,
+            label: 'Collabs',
             active: false,
             onTap: () => Navigator.of(context)
-                .pushReplacementNamed(AppRoutes.dealsInbox),
+                .pushReplacementNamed(AppRoutes.creatorCollaborations),
           ),
           _NavItem(
-            icon: Icons.settings,
-            label: 'Settings',
-            active: true,
-            onTap: () {},
+            icon: Icons.account_circle,
+            label: 'Profile',
+            active: false,
+            onTap: () => Navigator.of(context)
+                .pushReplacementNamed(AppRoutes.profileBento),
           ),
         ],
       ),

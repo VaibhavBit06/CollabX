@@ -238,7 +238,7 @@ class _BottomNav extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           _NavItem(
-            icon: Icons.home,
+            icon: Icons.home_outlined,
             label: 'Home',
             onTap: () =>
                 Navigator.of(context).pushReplacementNamed(AppRoutes.home),
@@ -250,10 +250,10 @@ class _BottomNav extends StatelessWidget {
                 .pushReplacementNamed(AppRoutes.brandMarketplace),
           ),
           _NavItem(
-            icon: Icons.forum_outlined,
-            label: 'Inbox',
+            icon: Icons.handshake_outlined,
+            label: 'Collabs',
             onTap: () => Navigator.of(context)
-                .pushReplacementNamed(AppRoutes.dealsInbox),
+                .pushReplacementNamed(AppRoutes.creatorCollaborations),
           ),
           _NavItem(
             icon: Icons.account_circle,

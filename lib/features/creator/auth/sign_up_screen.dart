@@ -149,12 +149,22 @@ class _PhoneSignUpTabState extends State<_PhoneSignUpTab> {
     setState(() {
       _loading = true;
     });
-    await AuthService.instance.signUpWithPhone(phone: _phoneController.text);
-    if (!mounted) return;
-    setState(() {
-      _loading = false;
-    });
-    Navigator.of(context).pushReplacementNamed(AppRoutes.creatorTypeSelection);
+    try {
+      await AuthService.instance.signUpWithPhone(phone: _phoneController.text);
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed(AppRoutes.creatorTypeSelection);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Phone sign up failed: ${e.toString().replaceAll('Exception: ', '')}')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -216,30 +226,19 @@ class _PhoneSignUpTabState extends State<_PhoneSignUpTab> {
               ),
             ),
           ],
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AuraColors.obsidian.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AuraColors.textPrimary.withOpacity(0.06)),
-            ),
-            child: Text(
-              'No backend: any name, phone + any 6-digit OTP.\n'
-              'Then → Creator Type → Basic Profile → Creator Home.',
-              style: TextStyle(
-                fontSize: 10,
-                height: 1.4,
-                color: AuraColors.chrome.withOpacity(0.6),
-              ),
-            ),
-          ),
+
           const SizedBox(height: 24),
           // Login link
           _AuthFooterLink(
             question: 'Already have an account?',
             actionText: 'Log In',
             onTap: () => Navigator.of(context).pushReplacementNamed(AppRoutes.login),
+          ),
+          const SizedBox(height: 12),
+          _AuthFooterLink(
+            question: 'Are you a Brand?',
+            actionText: 'Register here',
+            onTap: () => Navigator.of(context).pushReplacementNamed(AppRoutes.brandSignUp),
           ),
         ],
       ),
@@ -273,17 +272,37 @@ class _EmailSignUpTabState extends State<_EmailSignUpTab> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final confirm = _confirmController.text;
+    
     if (name.isEmpty || email.isEmpty || password.isEmpty) return;
-    if (password != confirm) return;
+    
+    if (password != confirm) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Passwords do not match')),
+      );
+      return;
+    }
+
     setState(() {
       _loading = true;
     });
-    await AuthService.instance.signUp(email: email, password: password);
-    if (!mounted) return;
-    setState(() {
-      _loading = false;
-    });
-    Navigator.of(context).pushReplacementNamed(AppRoutes.creatorTypeSelection);
+    try {
+      await AuthService.instance.signUp(email: email, password: password);
+      // Wait to populate basic profile or creator type next? 
+      // For now, continue to creator type selection.
+      if (!mounted) return;
+      Navigator.of(context).pushReplacementNamed(AppRoutes.creatorTypeSelection);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sign up failed: ${e.toString().replaceAll('Exception: ', '').replaceAll('[firebase_auth/email-already-in-use] ', '')}')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -329,24 +348,7 @@ class _EmailSignUpTabState extends State<_EmailSignUpTab> {
             loading: _loading,
             onPressed: _signUp,
           ),
-          const SizedBox(height: 24),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AuraColors.obsidian.withOpacity(0.5),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AuraColors.textPrimary.withOpacity(0.06)),
-            ),
-            child: Text(
-              'No backend: use any name, email, and matching passwords.\n'
-              'Then → Creator Type → Basic Profile → Creator Home.',
-              style: TextStyle(
-                fontSize: 10,
-                height: 1.4,
-                color: AuraColors.chrome.withOpacity(0.6),
-              ),
-            ),
-          ),
+
           const SizedBox(height: 24),
           // Login link
           _AuthFooterLink(

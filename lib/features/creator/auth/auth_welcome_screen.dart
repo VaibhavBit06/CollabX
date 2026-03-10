@@ -191,6 +191,47 @@ class _AuthWelcomeScreenState extends State<AuthWelcomeScreen>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
                               Text(
+                                'Are you a Brand?',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  letterSpacing: 0.5,
+                                  fontWeight: FontWeight.w300,
+                                  color: AuraColors.textPrimary.withOpacity(0.4),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () => Navigator.of(context).pushNamed(AppRoutes.brandSignUp),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AuraColors.sage.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: AuraColors.sage.withOpacity(0.2),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Join as Brand',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      letterSpacing: 1,
+                                      fontWeight: FontWeight.w600,
+                                      color: AuraColors.sage,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              Text(
                                 'Already a member?',
                                 style: TextStyle(
                                   fontSize: 13,
@@ -208,10 +249,10 @@ class _AuthWelcomeScreenState extends State<AuthWelcomeScreen>
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AuraColors.sage.withOpacity(0.1),
+                                    color: AuraColors.obsidian,
                                     borderRadius: BorderRadius.circular(20),
                                     border: Border.all(
-                                      color: AuraColors.sage.withOpacity(0.3),
+                                      color: AuraColors.chrome.withOpacity(0.1),
                                     ),
                                   ),
                                   child: Text(
@@ -220,7 +261,7 @@ class _AuthWelcomeScreenState extends State<AuthWelcomeScreen>
                                       fontSize: 12,
                                       letterSpacing: 1,
                                       fontWeight: FontWeight.w600,
-                                      color: AuraColors.sage,
+                                      color: AuraColors.chrome,
                                     ),
                                   ),
                                 ),

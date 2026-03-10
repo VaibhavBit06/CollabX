@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'package:aura_influencer_portfolio/theme/aura_theme.dart';
 import 'package:aura_influencer_portfolio/shared/utils/mock_data.dart';
+import 'package:aura_influencer_portfolio/shared/services/kyc_data.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
   const PersonalDetailsScreen({super.key});
@@ -17,10 +18,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   String _handle = MockUser.handle;
   String _education = MockUser.education;
   bool _isSchoolStudent = false;
-  
-  // KYC Status
-  String _kycStatus = MockUser.kycStatus; // Not Submitted, Pending, Verified, Rejected
-  
   // Payment details
   String _upiId = '';
   String _bankAccount = '';
@@ -371,44 +368,58 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                 // KYC Section
                 _SectionHeader(icon: Icons.verified_user_outlined, title: 'KYC Verification'),
                 const SizedBox(height: 12),
-                _SectionCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                AnimatedBuilder(
+                  animation: KycData.instance,
+                  builder: (context, child) {
+                    final aadhaarStatus = KycData.instance.getDocumentStatus(_name, 'Aadhaar Card');
+                    final panStatus = KycData.instance.getDocumentStatus(_name, 'PAN Card');
+                    
+                    // Determine overall status
+                    String overallStatus = 'Not Submitted';
+                    if (aadhaarStatus == 'Approved' && panStatus == 'Approved') {
+                      overallStatus = 'Verified';
+                    } else if (aadhaarStatus == 'Rejected' || panStatus == 'Rejected') {
+                      overallStatus = 'Rejected';
+                    } else if (aadhaarStatus == 'Pending' || panStatus == 'Pending') {
+                      overallStatus = 'Pending';
+                    } else if (aadhaarStatus == 'Approved' || panStatus == 'Approved') {
+                      overallStatus = 'Pending'; // one done, one missing counts as pending completion
+                    }
+
+                    return _SectionCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _KycStatusBadge(status: _kycStatus),
-                          const Spacer(),
-                          if (_kycStatus == 'Not Submitted' || _kycStatus == 'Rejected')
-                            TextButton(
-                              onPressed: () {
-                                // Upload KYC documents
-                                _showKycUploadSheet();
-                              },
-                              child: Text(
-                                _kycStatus == 'Rejected' ? 'Re-upload' : 'Upload',
-                                style: const TextStyle(
-                                  color: AuraColors.sage,
-                                  fontWeight: FontWeight.w600,
+                          Row(
+                            children: [
+                              _KycStatusBadge(status: overallStatus),
+                              const Spacer(),
+                              if (overallStatus == 'Not Submitted' || overallStatus == 'Rejected')
+                                TextButton(
+                                  onPressed: () => _showKycUploadSheet(),
+                                  child: Text(
+                                    overallStatus == 'Rejected' ? 'Re-upload' : 'Upload',
+                                    style: const TextStyle(color: AuraColors.sage, fontWeight: FontWeight.w600),
+                                  ),
                                 ),
-                              ),
-                            ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _KycDocumentRow(
+                            label: 'Aadhaar Card',
+                            status: aadhaarStatus,
+                            onUpload: () => _showKycUploadSheet(),
+                          ),
+                          const SizedBox(height: 12),
+                          _KycDocumentRow(
+                            label: 'PAN Card',
+                            status: panStatus,
+                            onUpload: () => _showKycUploadSheet(),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      _KycDocumentRow(
-                        label: 'Aadhaar Card',
-                        isUploaded: _kycStatus != 'Not Submitted',
-                        onUpload: () => _showKycUploadSheet(),
-                      ),
-                      const SizedBox(height: 12),
-                      _KycDocumentRow(
-                        label: 'PAN Card',
-                        isUploaded: _kycStatus != 'Not Submitted',
-                        onUpload: () => _showKycUploadSheet(),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
                 
@@ -636,7 +647,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
               sublabel: 'Front & Back',
               onTap: () {
                 Navigator.pop(context);
-                setState(() => _kycStatus = 'Pending');
+                KycData.instance.submitKyc(_name, _handle, 'Aadhaar Card');
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Aadhaar uploaded - Pending verification'),
@@ -652,7 +663,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
               sublabel: 'Clear photo',
               onTap: () {
                 Navigator.pop(context);
-                setState(() => _kycStatus = 'Pending');
+                KycData.instance.submitKyc(_name, _handle, 'PAN Card');
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('PAN uploaded - Pending verification'),
@@ -926,50 +937,69 @@ class _KycStatusBadge extends StatelessWidget {
 class _KycDocumentRow extends StatelessWidget {
   const _KycDocumentRow({
     required this.label,
-    required this.isUploaded,
+    required this.status,
     required this.onUpload,
   });
 
   final String label;
-  final bool isUploaded;
+  final String status;
   final VoidCallback onUpload;
 
   @override
   Widget build(BuildContext context) {
+    bool isPending = status == 'Pending';
+    bool isRejected = status == 'Rejected';
+    bool isApproved = status == 'Approved';
+
+    Color iconColor;
+    IconData iconData;
+    if (isPending) {
+      iconColor = Colors.orange;
+      iconData = Icons.access_time;
+    } else if (isRejected) {
+      iconColor = Colors.red;
+      iconData = Icons.error_outline;
+    } else if (isApproved) {
+      iconColor = Colors.green;
+      iconData = Icons.check;
+    } else {
+      iconColor = AuraColors.chrome.withOpacity(0.5);
+      iconData = Icons.upload_file;
+    }
+
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: (isUploaded ? Colors.green : AuraColors.chrome).withOpacity(0.1),
+            color: iconColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            isUploaded ? Icons.check : Icons.upload_file,
-            size: 18,
-            color: isUploaded ? Colors.green : AuraColors.chrome.withOpacity(0.5),
-          ),
+          child: Icon(iconData, size: 18, color: iconColor),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: AuraColors.chrome.withOpacity(0.8),
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(fontSize: 14, color: AuraColors.chrome.withOpacity(0.8)),
+              ),
+              if (status != 'Not Submitted')
+                Text(
+                  status,
+                  style: TextStyle(fontSize: 12, color: iconColor),
+                ),
+            ],
           ),
         ),
-        if (!isUploaded)
+        if (status == 'Not Submitted' || isRejected)
           GestureDetector(
             onTap: onUpload,
             child: Text(
               'Upload',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AuraColors.sage,
-              ),
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AuraColors.sage),
             ),
           ),
       ],

@@ -36,7 +36,16 @@ enum _BentoShape { tall, wide, square }
 
 // ─── Main Screen ───
 class ProfileBentoScreen extends StatefulWidget {
-  const ProfileBentoScreen({super.key});
+  const ProfileBentoScreen({
+    super.key,
+    this.isPublicView = false,
+    this.customDisplayName,
+    this.customHandle,
+  });
+
+  final bool isPublicView;
+  final String? customDisplayName;
+  final String? customHandle;
 
   @override
   State<ProfileBentoScreen> createState() => _ProfileBentoScreenState();
@@ -51,7 +60,7 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
   bool _isAvailable = true;
   bool _isLoading = true;
 
-  // Posts sourced from centralized mock data
+  // Posts - mutable so new posts can be added
   late final List<_SocialPost> _posts = MockProfile.posts
       .map((p) => _SocialPost(
             caption: p.caption,
@@ -64,22 +73,194 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
           ))
       .toList();
 
-  final List<String> _nicheTags = MockProfile.nicheTags;
-
-  // Bento layout pattern — repeats every 6 posts:
-  // Row A: [tall] [square, square stacked]
-  // Row B: [wide spanning full] or [square, square] [tall]
-  // This creates the asymmetric bento look
-  static const List<_BentoShape> _layoutPattern = [
-    _BentoShape.tall,   // 0 — left tall
-    _BentoShape.square,  // 1 — right top
-    _BentoShape.square,  // 2 — right bottom
-    _BentoShape.wide,    // 3 — full width wide
-    _BentoShape.square,  // 4 — left top
-    _BentoShape.square,  // 5 — left bottom
-    _BentoShape.tall,    // 6 — right tall
-    _BentoShape.wide,    // 7 — full width wide
+  // Accent colors cycling for new posts
+  static const List<Color> _postColors = [
+    Color(0xFF7EB5D6),
+    Color(0xFFE8A87C),
+    Color(0xFFB8A9C9),
+    Color(0xFFE8C07A),
+    Color(0xFF9BC4A8),
   ];
+
+  void _showAddPostSheet() {
+    final captionCtrl = TextEditingController();
+    final likesCtrl = TextEditingController();
+    final commentsCtrl = TextEditingController();
+    String platform = 'Instagram';
+
+    HapticFeedback.mediumImpact();
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx2, setSheetState) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx2).viewInsets.bottom,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1A2E),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(32)),
+                border: Border.all(
+                  color: AuraColors.textPrimary.withOpacity(0.08),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Handle bar
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: AuraColors.textPrimary.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Add Post to Portfolio',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w300,
+                      color: AuraColors.chrome,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'This post will appear in your bento portfolio grid.',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AuraColors.textPrimary.withOpacity(0.4),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Platform selector
+                  Row(
+                    children: [
+                      for (final p in ['Instagram', 'YouTube', 'LinkedIn'])
+                        GestureDetector(
+                          onTap: () => setSheetState(() => platform = p),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            margin: const EdgeInsets.only(right: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: platform == p
+                                  ? AuraColors.sage.withOpacity(0.15)
+                                  : AuraColors.obsidian.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: platform == p
+                                    ? AuraColors.sage.withOpacity(0.5)
+                                    : AuraColors.textPrimary.withOpacity(0.1),
+                              ),
+                            ),
+                            child: Text(
+                              p,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: platform == p
+                                    ? AuraColors.sage
+                                    : AuraColors.textPrimary.withOpacity(0.4),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _SheetField(
+                    controller: captionCtrl,
+                    hint: 'Post caption or title...',
+                    icon: Icons.text_fields,
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _SheetField(
+                          controller: likesCtrl,
+                          hint: 'Likes (e.g. 12.4K)',
+                          icon: Icons.favorite_border,
+                          keyboardType: TextInputType.text,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _SheetField(
+                          controller: commentsCtrl,
+                          hint: 'Comments (e.g. 842)',
+                          icon: Icons.chat_bubble_outline,
+                          keyboardType: TextInputType.text,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AuraColors.sage,
+                        foregroundColor: AuraColors.midnight,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: () {
+                        final caption = captionCtrl.text.trim();
+                        if (caption.isEmpty) return;
+                        final colorIndex = _posts.length % _postColors.length;
+                        final newPost = _SocialPost(
+                          caption: caption,
+                          platform: platform,
+                          likes: likesCtrl.text.trim().isEmpty
+                              ? '0'
+                              : likesCtrl.text.trim(),
+                          comments: commentsCtrl.text.trim().isEmpty
+                              ? '0'
+                              : commentsCtrl.text.trim(),
+                          timeAgo: 'Just now',
+                          placeholderIcon: platform == 'YouTube'
+                              ? Icons.play_circle_outline
+                              : platform == 'LinkedIn'
+                                  ? Icons.business_center_outlined
+                                  : Icons.photo_outlined,
+                          accentColor: _postColors[colorIndex],
+                        );
+                        setState(() => _posts.insert(0, newPost));
+                        Navigator.of(ctx).pop();
+                        HapticFeedback.lightImpact();
+                      },
+                      child: const Text(
+                        'Add to Portfolio',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  final List<String> _nicheTags = MockProfile.nicheTags;
 
   @override
   void initState() {
@@ -114,15 +295,6 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
     _gradientRingController.dispose();
     super.dispose();
   }
-
-  void _goHome(BuildContext context) =>
-      Navigator.of(context).pushReplacementNamed(AppRoutes.home);
-
-  void _goDiscover(BuildContext context) =>
-      Navigator.of(context).pushReplacementNamed(AppRoutes.brandMarketplace);
-
-  void _goInbox(BuildContext context) =>
-      Navigator.of(context).pushReplacementNamed(AppRoutes.dealsInbox);
 
   void _goSettings(BuildContext context) =>
       Navigator.of(context).pushNamed(AppRoutes.settings);
@@ -204,9 +376,13 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
                   opacity: _fadeFor(0),
                   child: SlideTransition(
                     position: _slideFor(0),
-                    child: _Header(
-                      onSettingsTap: () => _goSettings(context),
-                    ),
+                    child: widget.isPublicView
+                        ? _PublicHeader(
+                            title: widget.customDisplayName ?? 'PORTFOLIO',
+                          )
+                        : _Header(
+                            onSettingsTap: () => _goSettings(context),
+                          ),
                   ),
                 ),
                 Expanded(
@@ -233,15 +409,18 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
                           ),
                         ),
                         const SizedBox(height: 12),
-                        // Availability toggle
-                        FadeTransition(
-                          opacity: _fadeFor(3),
-                          child: SlideTransition(
-                            position: _slideFor(3),
-                            child: _buildAvailabilityToggle(),
+                        // Availability toggle - only shown to the creator
+                        if (!widget.isPublicView) ...[
+                          FadeTransition(
+                            opacity: _fadeFor(3),
+                            child: SlideTransition(
+                              position: _slideFor(3),
+                              child: _buildAvailabilityToggle(),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
+                        ] else
+                          const SizedBox(height: 8),
                         // Stats row
                         FadeTransition(
                           opacity: _fadeFor(4),
@@ -251,15 +430,17 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
                           ),
                         ),
                         const SizedBox(height: 20),
-                        // Your Campaigns button
-                        FadeTransition(
-                          opacity: _fadeFor(5),
-                          child: SlideTransition(
-                            position: _slideFor(5),
-                            child: _buildCampaignsButton(),
+                        // Your Campaigns button - only shown to the creator
+                        if (!widget.isPublicView) ...[
+                          FadeTransition(
+                            opacity: _fadeFor(5),
+                            child: SlideTransition(
+                              position: _slideFor(5),
+                              child: _buildCampaignsButton(),
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
+                          const SizedBox(height: 20),
+                        ],
                         // Posts header
                         FadeTransition(
                           opacity: _fadeFor(6),
@@ -280,23 +461,20 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
                           ),
                         ),
                         const SizedBox(height: 24),
-                        // Booking CTA
-                        FadeTransition(
-                          opacity: _fadeFor(8),
-                          child: SlideTransition(
-                            position: _slideFor(8),
-                            child: _buildBookingCTA(),
-                          ),
-                        ),
                       ],
                     ),
                   ),
                 ),
-                _BottomNav(
-                  onHome: () => _goHome(context),
-                  onDiscover: () => _goDiscover(context),
-                  onInbox: () => _goInbox(context),
-                ),
+                if (!widget.isPublicView)
+                  _BottomNav(
+                    onHome: () => Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.home),
+                    onDiscover: () => Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.brandMarketplace),
+                    onCollabs: () => Navigator.of(context)
+                        .pushReplacementNamed(AppRoutes.creatorCollaborations),
+                    onProfile: () {},
+                  ),
               ],
             ),
           ),
@@ -327,8 +505,7 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: SweepGradient(
-                        startAngle:
-                            _gradientRingController.value * 2 * math.pi,
+                        startAngle: _gradientRingController.value * 2 * math.pi,
                         colors: [
                           AuraColors.sage,
                           AuraColors.sage.withOpacity(0.3),
@@ -392,12 +569,13 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  MockUser.fullName,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w300),
+                  widget.customDisplayName ?? MockUser.fullName,
+                  style: const TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.w300),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${MockUser.handle} \u2022 ${MockUser.location}',
+                  '${widget.customHandle ?? MockUser.handle} \u2022 ${MockUser.location}',
                   style: TextStyle(
                     fontSize: 12,
                     color: AuraColors.sage.withOpacity(0.8),
@@ -538,7 +716,7 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  'COMBINED REACH',
+                  'TOTAL FOLLOWERS',
                   style: TextStyle(
                     fontSize: 10,
                     letterSpacing: 2,
@@ -548,7 +726,7 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
                 ),
                 const SizedBox(height: 8),
                 _AnimatedCounter(
-                  targetValue: 1200000,
+                  targetValue: 124000,
                   suffix: '',
                   formatAsShort: true,
                   style: TextStyle(
@@ -559,7 +737,7 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Across 3 platforms',
+                  'Instagram followers',
                   style: TextStyle(
                     fontSize: 11,
                     color: AuraColors.midnight.withOpacity(0.7),
@@ -695,13 +873,42 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
             ),
           ),
         ),
-        Text(
-          'Long-press to preview',
-          style: TextStyle(
-            fontSize: 9,
-            color: AuraColors.textPrimary.withOpacity(0.2),
+        if (!widget.isPublicView)
+          GestureDetector(
+            onTap: _showAddPostSheet,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AuraColors.sage.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AuraColors.sage.withOpacity(0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.add, size: 12, color: AuraColors.sage),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Add Post',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: AuraColors.sage.withOpacity(0.9),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          Text(
+            'Long-press to preview',
+            style: TextStyle(
+              fontSize: 9,
+              color: AuraColors.textPrimary.withOpacity(0.2),
+            ),
           ),
-        ),
       ],
     );
   }
@@ -722,9 +929,13 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
                 flex: 2,
                 child: Column(
                   children: [
-                    Expanded(child: _ShimmerBox(height: double.infinity, radius: 20)),
+                    Expanded(
+                        child:
+                            _ShimmerBox(height: double.infinity, radius: 20)),
                     const SizedBox(height: g),
-                    Expanded(child: _ShimmerBox(height: double.infinity, radius: 20)),
+                    Expanded(
+                        child:
+                            _ShimmerBox(height: double.infinity, radius: 20)),
                   ],
                 ),
               ),
@@ -744,9 +955,13 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
                 flex: 2,
                 child: Column(
                   children: [
-                    Expanded(child: _ShimmerBox(height: double.infinity, radius: 20)),
+                    Expanded(
+                        child:
+                            _ShimmerBox(height: double.infinity, radius: 20)),
                     const SizedBox(height: g),
-                    Expanded(child: _ShimmerBox(height: double.infinity, radius: 20)),
+                    Expanded(
+                        child:
+                            _ShimmerBox(height: double.infinity, radius: 20)),
                   ],
                 ),
               ),
@@ -925,35 +1140,6 @@ class _ProfileBentoScreenState extends State<ProfileBentoScreen>
 
     return Column(children: widgets);
   }
-
-  Widget _buildBookingCTA() {
-    return SizedBox(
-      width: double.infinity,
-      height: 64,
-      child: ElevatedButton(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Contact options opening...')),
-          );
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AuraColors.chrome,
-          foregroundColor: AuraColors.midnight,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(999),
-          ),
-        ),
-        child: const Text(
-          'BOOKING / CONTACT',
-          style: TextStyle(
-            fontSize: 12,
-            letterSpacing: 2,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 // ─── Bento Post Tile ───
@@ -1025,8 +1211,7 @@ class _BentoPostTileState extends State<_BentoPostTile> {
               // Post content area
               Positioned.fill(
                 child: ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(widget.borderRadius - 1),
+                  borderRadius: BorderRadius.circular(widget.borderRadius - 1),
                   child: _PostPlaceholder(
                     icon: widget.post.placeholderIcon,
                     accentColor: widget.post.accentColor,
@@ -1084,7 +1269,8 @@ class _BentoPostTileState extends State<_BentoPostTile> {
                     Row(
                       children: [
                         Icon(Icons.favorite_border,
-                            size: 11, color: AuraColors.textPrimary.withOpacity(0.5)),
+                            size: 11,
+                            color: AuraColors.textPrimary.withOpacity(0.5)),
                         const SizedBox(width: 3),
                         Text(
                           widget.post.likes,
@@ -1095,7 +1281,8 @@ class _BentoPostTileState extends State<_BentoPostTile> {
                         ),
                         const SizedBox(width: 10),
                         Icon(Icons.chat_bubble_outline,
-                            size: 10, color: AuraColors.textPrimary.withOpacity(0.4)),
+                            size: 10,
+                            color: AuraColors.textPrimary.withOpacity(0.4)),
                         const SizedBox(width: 3),
                         Text(
                           widget.post.comments,
@@ -1214,6 +1401,37 @@ class _PostPlaceholder extends StatelessWidget {
 }
 
 // ─── Header ───
+class _PublicHeader extends StatelessWidget {
+  const _PublicHeader({required this.title});
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: Icon(Icons.arrow_back_ios, color: AuraColors.chrome),
+          ),
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              fontSize: 12,
+              letterSpacing: 4,
+              fontWeight: FontWeight.w300,
+              color: AuraColors.chrome,
+            ),
+          ),
+          const SizedBox(width: 48), // Spacer to center title
+        ],
+      ),
+    );
+  }
+}
+
 class _Header extends StatelessWidget {
   const _Header({required this.onSettingsTap});
 
@@ -1276,7 +1494,8 @@ class _FrostedPostPreview extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AuraColors.obsidian.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(32),
-                border: Border.all(color: AuraColors.textPrimary.withOpacity(0.1)),
+                border:
+                    Border.all(color: AuraColors.textPrimary.withOpacity(0.1)),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1311,8 +1530,8 @@ class _FrostedPostPreview extends StatelessWidget {
                   const SizedBox(height: 20),
                   // Platform badge
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: const Color(0xFFE1306C).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
@@ -1349,8 +1568,7 @@ class _FrostedPostPreview extends StatelessWidget {
                   Row(
                     children: [
                       Icon(Icons.favorite,
-                          size: 16,
-                          color: post.accentColor.withOpacity(0.7)),
+                          size: 16, color: post.accentColor.withOpacity(0.7)),
                       const SizedBox(width: 6),
                       Text(
                         post.likes,
@@ -1537,7 +1755,8 @@ class _AnimatedSocialTileState extends State<_AnimatedSocialTile>
             return Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(widget.icon, size: 16, color: AuraColors.textPrimary.withOpacity(0.7)),
+                Icon(widget.icon,
+                    size: 16, color: AuraColors.textPrimary.withOpacity(0.7)),
                 const SizedBox(width: 8),
                 Text(
                   _formatShort(cur),
@@ -1622,8 +1841,7 @@ class _GradientMeshPainter extends CustomPainter {
     final paint = Paint()..style = PaintingStyle.fill;
 
     final cx1 = size.width * (0.3 + 0.15 * math.sin(progress * 2 * math.pi));
-    final cy1 =
-        size.height * (0.2 + 0.1 * math.cos(progress * 2 * math.pi));
+    final cy1 = size.height * (0.2 + 0.1 * math.cos(progress * 2 * math.pi));
     paint.shader = RadialGradient(
       colors: [
         AuraColors.sage.withOpacity(0.06),
@@ -1632,10 +1850,10 @@ class _GradientMeshPainter extends CustomPainter {
     ).createShader(Rect.fromCircle(center: Offset(cx1, cy1), radius: 200));
     canvas.drawCircle(Offset(cx1, cy1), 200, paint);
 
-    final cx2 = size.width *
-        (0.7 + 0.12 * math.cos(progress * 2 * math.pi + 1.5));
-    final cy2 = size.height *
-        (0.6 + 0.15 * math.sin(progress * 2 * math.pi + 1.0));
+    final cx2 =
+        size.width * (0.7 + 0.12 * math.cos(progress * 2 * math.pi + 1.5));
+    final cy2 =
+        size.height * (0.6 + 0.15 * math.sin(progress * 2 * math.pi + 1.0));
     paint.shader = RadialGradient(
       colors: [
         const Color(0xFF4A7C6F).withOpacity(0.04),
@@ -1644,10 +1862,10 @@ class _GradientMeshPainter extends CustomPainter {
     ).createShader(Rect.fromCircle(center: Offset(cx2, cy2), radius: 180));
     canvas.drawCircle(Offset(cx2, cy2), 180, paint);
 
-    final cx3 = size.width *
-        (0.5 + 0.2 * math.sin(progress * 2 * math.pi + 3.0));
-    final cy3 = size.height *
-        (0.8 + 0.08 * math.cos(progress * 2 * math.pi + 2.0));
+    final cx3 =
+        size.width * (0.5 + 0.2 * math.sin(progress * 2 * math.pi + 3.0));
+    final cy3 =
+        size.height * (0.8 + 0.08 * math.cos(progress * 2 * math.pi + 2.0));
     paint.shader = RadialGradient(
       colors: [
         AuraColors.sage.withOpacity(0.03),
@@ -1667,12 +1885,14 @@ class _BottomNav extends StatelessWidget {
   const _BottomNav({
     required this.onHome,
     required this.onDiscover,
-    required this.onInbox,
+    required this.onCollabs,
+    required this.onProfile,
   });
 
   final VoidCallback onHome;
   final VoidCallback onDiscover;
-  final VoidCallback onInbox;
+  final VoidCallback onCollabs;
+  final VoidCallback onProfile;
 
   @override
   Widget build(BuildContext context) {
@@ -1698,15 +1918,15 @@ class _BottomNav extends StatelessWidget {
               active: false,
               onTap: onDiscover),
           _NavItem(
-              icon: Icons.forum_outlined,
-              label: 'Inbox',
+              icon: Icons.handshake_outlined,
+              label: 'Collabs',
               active: false,
-              onTap: onInbox),
+              onTap: onCollabs),
           _NavItem(
               icon: Icons.account_circle,
               label: 'Profile',
               active: true,
-              onTap: () {}),
+              onTap: onProfile),
         ],
       ),
     );
@@ -1746,6 +1966,57 @@ class _NavItem extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Sheet Input Field ───
+class _SheetField extends StatelessWidget {
+  const _SheetField({
+    required this.controller,
+    required this.hint,
+    required this.icon,
+    this.keyboardType = TextInputType.text,
+  });
+
+  final TextEditingController controller;
+  final String hint;
+  final IconData icon;
+  final TextInputType keyboardType;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AuraColors.obsidian.withOpacity(0.7),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AuraColors.textPrimary.withOpacity(0.08),
+        ),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        style: TextStyle(
+          fontSize: 13,
+          color: AuraColors.textPrimary,
+        ),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: TextStyle(
+            fontSize: 13,
+            color: AuraColors.textPrimary.withOpacity(0.3),
+          ),
+          prefixIcon: Icon(
+            icon,
+            size: 18,
+            color: AuraColors.textPrimary.withOpacity(0.3),
+          ),
+          border: InputBorder.none,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        ),
       ),
     );
   }

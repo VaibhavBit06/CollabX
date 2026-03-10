@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:aura_influencer_portfolio/routing/app_router.dart';
 import 'package:aura_influencer_portfolio/theme/aura_theme.dart';
 import 'package:aura_influencer_portfolio/shared/services/auth_service.dart';
+import 'package:aura_influencer_portfolio/shared/models/user.dart';
 import 'package:aura_influencer_portfolio/shared/utils/constants.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -32,7 +33,13 @@ class _SplashScreenState extends State<SplashScreen>
     final Stopwatch stopwatch = Stopwatch()..start();
 
     // Ask the auth layer who (if anyone) is currently signed in.
-    final user = await AuthService.instance.getCurrentUser();
+    MockUser? user;
+    try {
+      user = await AuthService.instance.getCurrentUser().timeout(const Duration(seconds: 3));
+    } catch (e) {
+      debugPrint('Auth check failed or timed out: $e');
+      user = null;
+    }
 
     final Duration elapsed = stopwatch.elapsed;
     if (elapsed < minSplashDuration) {
@@ -46,6 +53,9 @@ class _SplashScreenState extends State<SplashScreen>
     } else if (user.role == UserRole.admin) {
       // Admin role → admin dashboard.
       Navigator.of(context).pushReplacementNamed(AppRoutes.adminDashboard);
+    } else if (user.role == UserRole.brand) {
+      // Brand role → brand dashboard.
+      Navigator.of(context).pushReplacementNamed(AppRoutes.brandDashboard);
     } else {
       // Default signed‑in path → creator home dashboard.
       Navigator.of(context).pushReplacementNamed(AppRoutes.home);

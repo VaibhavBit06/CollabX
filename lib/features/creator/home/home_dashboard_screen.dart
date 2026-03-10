@@ -89,8 +89,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                   child: SlideTransition(
                     position: _slideFor(0),
                     child: _Header(
-                      onTapSettings: () => Navigator.of(context)
-                          .pushNamed(AppRoutes.settings),
+                      onTapSettings: () =>
+                          Navigator.of(context).pushNamed(AppRoutes.settings),
                       onTapWallet: () =>
                           Navigator.of(context).pushNamed(AppRoutes.wallet),
                     ),
@@ -112,99 +112,43 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                           ),
                         ),
                         const SizedBox(height: 20),
-                        // Weekly snapshot header
+                        // Total Earned card
                         FadeTransition(
                           opacity: _fadeFor(2),
                           child: SlideTransition(
                             position: _slideFor(2),
-                            child: GestureDetector(
-                              onTap: () => Navigator.of(context)
-                                  .pushNamed(AppRoutes.weeklySnapshot),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'WEEKLY SNAPSHOT',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      letterSpacing: 3,
-                                      fontWeight: FontWeight.w600,
-                                      color: AuraColors.textPrimary.withOpacity(0.4),
-                                    ),
-                                  ),
-                                  Row(
-                                    children: [
-                                      Container(
-                                        width: 6,
-                                        height: 6,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.greenAccent.shade400,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.greenAccent
-                                                  .withOpacity(0.4),
-                                              blurRadius: 6,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Text(
-                                        'Live',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          letterSpacing: 1,
-                                          color:
-                                              Colors.greenAccent.withOpacity(0.8),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        // Reach card
-                        FadeTransition(
-                          opacity: _fadeFor(3),
-                          child: SlideTransition(
-                            position: _slideFor(3),
-                            child: _ReachCard(),
+                            child: _EarnedCard(),
                           ),
                         ),
                         const SizedBox(height: 12),
                         // Metric tiles row
                         FadeTransition(
-                          opacity: _fadeFor(4),
+                          opacity: _fadeFor(3),
                           child: SlideTransition(
-                            position: _slideFor(4),
+                            position: _slideFor(3),
                             child: Row(
                               children: <Widget>[
                                 Expanded(
                                   child: _MetricTile(
-                                    label: 'New Subs',
-                                    value: MockStats.newSubscribers,
-                                    delta: MockStats.newSubsDelta,
-                                    icon: Icons.person_add_outlined,
+                                    label: 'Total Campaigns',
+                                    value: MockWallet.campaignsCompleted,
+                                    delta: '+2 new',
+                                    icon: Icons.campaign_outlined,
                                     accentColor: const Color(0xFF7EB5D6),
                                     onTap: () => Navigator.of(context)
-                                        .pushNamed(AppRoutes.platformGrowth),
+                                        .pushNamed(AppRoutes.campaignBrief),
                                   ),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: _MetricTile(
-                                    label: 'Engagement',
-                                    value: MockStats.engagementRate,
-                                    delta: MockStats.engagementDelta,
-                                    icon: Icons.favorite_border,
+                                    label: 'My Following',
+                                    value: '124K',
+                                    delta: '+3.2%',
+                                    icon: Icons.people_outline,
                                     accentColor: const Color(0xFFE8A87C),
                                     onTap: () => Navigator.of(context)
-                                        .pushNamed(AppRoutes.engagementRate),
+                                        .pushNamed(AppRoutes.platformGrowth),
                                   ),
                                 ),
                               ],
@@ -214,18 +158,18 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                         const SizedBox(height: 24),
                         // Quick actions
                         FadeTransition(
-                          opacity: _fadeFor(5),
+                          opacity: _fadeFor(4),
                           child: SlideTransition(
-                            position: _slideFor(5),
+                            position: _slideFor(4),
                             child: _QuickActionsRow(),
                           ),
                         ),
                         const SizedBox(height: 24),
                         // Recent activity
                         FadeTransition(
-                          opacity: _fadeFor(6),
+                          opacity: _fadeFor(5),
                           child: SlideTransition(
-                            position: _slideFor(6),
+                            position: _slideFor(5),
                             child: Text(
                               'RECENT ACTIVITY',
                               style: TextStyle(
@@ -239,9 +183,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                         ),
                         const SizedBox(height: 12),
                         FadeTransition(
-                          opacity: _fadeFor(7),
+                          opacity: _fadeFor(6),
                           child: SlideTransition(
-                            position: _slideFor(7),
+                            position: _slideFor(6),
                             child: _ActivityCard(
                               icon: Icons.verified,
                               iconColor: const Color(0xFF7EB5D6),
@@ -249,14 +193,14 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                               subtitle: MockActivities.recent[0].timeAgo,
                               trailing: 'VIEW',
                               onTap: () => Navigator.of(context)
-                                  .pushNamed(AppRoutes.dealsInbox),
+                                  .pushNamed(AppRoutes.creatorCollaborations),
                             ),
                           ),
                         ),
                         FadeTransition(
-                          opacity: _fadeFor(8),
+                          opacity: _fadeFor(7),
                           child: SlideTransition(
-                            position: _slideFor(8),
+                            position: _slideFor(7),
                             child: _ActivityCard(
                               icon: Icons.payments_outlined,
                               iconColor: AuraColors.sage,
@@ -269,9 +213,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                           ),
                         ),
                         FadeTransition(
-                          opacity: _fadeFor(9),
+                          opacity: _fadeFor(8),
                           child: SlideTransition(
-                            position: _slideFor(9),
+                            position: _slideFor(8),
                             child: _ActivityCard(
                               icon: Icons.trending_up,
                               iconColor: const Color(0xFFE8A87C),
@@ -288,11 +232,12 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen>
                   ),
                 ),
                 _BottomNav(
-                  onHome: () {},
+                  onHome: () => Navigator.of(context)
+                      .pushReplacementNamed(AppRoutes.home),
                   onDiscover: () => Navigator.of(context)
                       .pushReplacementNamed(AppRoutes.brandMarketplace),
-                  onInbox: () => Navigator.of(context)
-                      .pushReplacementNamed(AppRoutes.dealsInbox),
+                  onCollabs: () => Navigator.of(context)
+                      .pushReplacementNamed(AppRoutes.creatorCollaborations),
                   onProfile: () => Navigator.of(context)
                       .pushReplacementNamed(AppRoutes.profileBento),
                 ),
@@ -434,14 +379,15 @@ class _Header extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AuraColors.obsidian.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(12),
-                    border:
-                        Border.all(color: AuraColors.textPrimary.withOpacity(0.06)),
+                    border: Border.all(
+                        color: AuraColors.textPrimary.withOpacity(0.06)),
                   ),
                   child: Stack(
                     children: [
                       Center(
                         child: Icon(Icons.notifications_none,
-                            color: AuraColors.textPrimary.withOpacity(0.7), size: 18),
+                            color: AuraColors.textPrimary.withOpacity(0.7),
+                            size: 18),
                       ),
                       Positioned(
                         right: 8,
@@ -497,13 +443,12 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ─── Reach Card ───
-class _ReachCard extends StatelessWidget {
+// ─── Earned Card ───
+class _EarnedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-          Navigator.of(context).pushNamed(AppRoutes.weeklySnapshot),
+      onTap: () => Navigator.of(context).pushNamed(AppRoutes.wallet),
       child: Container(
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
@@ -526,7 +471,7 @@ class _ReachCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'TOTAL REACH',
+                  'TOTAL EARNED',
                   style: TextStyle(
                     fontSize: 10,
                     letterSpacing: 2,
@@ -544,11 +489,11 @@ class _ReachCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.trending_up,
+                      Icon(Icons.account_balance_wallet_outlined,
                           size: 10, color: AuraColors.sage.withOpacity(0.8)),
                       const SizedBox(width: 4),
                       Text(
-                        '+12.4%',
+                        'Lifetime',
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
@@ -562,9 +507,9 @@ class _ReachCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              '1.2M',
+              MockWallet.lifetimeEarnings,
               style: TextStyle(
-                fontSize: 42,
+                fontSize: 38,
                 fontWeight: FontWeight.w200,
                 color: AuraColors.textPrimary,
                 letterSpacing: -1,
@@ -577,7 +522,7 @@ class _ReachCard extends StatelessWidget {
                 for (int i = 0; i < 7; i++) ...[
                   Expanded(
                     child: Container(
-                      height: [24.0, 18.0, 30.0, 22.0, 34.0, 28.0, 38.0][i],
+                      height: [18.0, 24.0, 20.0, 32.0, 26.0, 34.0, 40.0][i],
                       decoration: BoxDecoration(
                         color: AuraColors.sage
                             .withOpacity(i == 6 ? 0.6 : 0.15 + i * 0.04),
@@ -590,22 +535,12 @@ class _ReachCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                for (final d in ['M', 'T', 'W', 'T', 'F', 'S', 'S'])
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        d,
-                        style: TextStyle(
-                          fontSize: 9,
-                          color: AuraColors.textPrimary.withOpacity(0.25),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+            Text(
+              MockWallet.monthlyEarnings,
+              style: TextStyle(
+                fontSize: 11,
+                color: AuraColors.sage.withOpacity(0.7),
+              ),
             ),
           ],
         ),
@@ -742,8 +677,7 @@ class _QuickActionsRow extends StatelessWidget {
           child: _QuickAction(
             icon: Icons.account_balance_wallet_outlined,
             label: 'Wallet',
-            onTap: () =>
-                Navigator.of(context).pushNamed(AppRoutes.wallet),
+            onTap: () => Navigator.of(context).pushNamed(AppRoutes.wallet),
           ),
         ),
       ],
@@ -791,7 +725,8 @@ class _QuickActionState extends State<_QuickAction> {
           ),
           child: Column(
             children: [
-              Icon(widget.icon, size: 22, color: AuraColors.textPrimary.withOpacity(0.6)),
+              Icon(widget.icon,
+                  size: 22, color: AuraColors.textPrimary.withOpacity(0.6)),
               const SizedBox(height: 8),
               Text(
                 widget.label,
@@ -941,13 +876,13 @@ class _BottomNav extends StatelessWidget {
   const _BottomNav({
     required this.onHome,
     required this.onDiscover,
-    required this.onInbox,
+    required this.onCollabs,
     required this.onProfile,
   });
 
   final VoidCallback onHome;
   final VoidCallback onDiscover;
-  final VoidCallback onInbox;
+  final VoidCallback onCollabs;
   final VoidCallback onProfile;
 
   @override
@@ -971,10 +906,10 @@ class _BottomNav extends StatelessWidget {
               active: false,
               onTap: onDiscover),
           _NavItem(
-              icon: Icons.forum_outlined,
-              label: 'Inbox',
+              icon: Icons.handshake_outlined,
+              label: 'Collabs',
               active: false,
-              onTap: onInbox),
+              onTap: onCollabs),
           _NavItem(
               icon: Icons.account_circle,
               label: 'Profile',

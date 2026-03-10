@@ -230,6 +230,8 @@ class _DealsInboxScreenState extends State<DealsInboxScreen>
               onDiscover: () => Navigator.of(context)
                   .pushReplacementNamed(AppRoutes.brandMarketplace),
               onInbox: () {},
+              onCollabs: () => Navigator.of(context)
+                  .pushReplacementNamed(AppRoutes.creatorCollaborations),
               onProfile: () => Navigator.of(context)
                   .pushReplacementNamed(AppRoutes.profileBento),
             ),
@@ -512,12 +514,14 @@ class _BottomNav extends StatelessWidget {
     required this.onHome,
     required this.onDiscover,
     required this.onInbox,
+    required this.onCollabs,
     required this.onProfile,
   });
 
   final VoidCallback onHome;
   final VoidCallback onDiscover;
   final VoidCallback onInbox;
+  final VoidCallback onCollabs;
   final VoidCallback onProfile;
 
   @override
@@ -544,10 +548,10 @@ class _BottomNav extends StatelessWidget {
               active: false,
               onTap: onDiscover),
           _NavItem(
-              icon: Icons.forum,
-              label: 'Inbox',
+              icon: Icons.handshake_outlined,
+              label: 'Collabs',
               active: true,
-              onTap: onInbox),
+              onTap: onCollabs),
           _NavItem(
               icon: Icons.account_circle,
               label: 'Profile',

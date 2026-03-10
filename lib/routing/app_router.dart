@@ -20,9 +20,13 @@ import 'package:aura_influencer_portfolio/features/creator/analytics/engagement_
 import 'package:aura_influencer_portfolio/features/creator/analytics/platform_growth_screen.dart';
 import 'package:aura_influencer_portfolio/features/creator/analytics/weekly_snapshot_screen.dart';
 import 'package:aura_influencer_portfolio/features/creator/campaigns/campaign_brief_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/campaigns/creator_collaborations_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/campaigns/creator_collab_details_screen.dart';
 
 import 'package:aura_influencer_portfolio/features/creator/support/help_support_screen.dart';
 import 'package:aura_influencer_portfolio/features/creator/settings/social_links_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/settings/privacy_settings_screen.dart';
+import 'package:aura_influencer_portfolio/features/creator/settings/notification_settings_screen.dart';
 
 import 'package:aura_influencer_portfolio/features/creator/profile/profile_bento_screen.dart';
 import 'package:aura_influencer_portfolio/features/creator/marketplace/brand_marketplace_screen.dart';
@@ -32,6 +36,20 @@ import 'package:aura_influencer_portfolio/features/creator/finance/withdraw_scre
 import 'package:aura_influencer_portfolio/features/admin/admin_dashboard_screen.dart';
 import 'package:aura_influencer_portfolio/features/creator/settings/personal_details_screen.dart';
 import 'package:aura_influencer_portfolio/features/creator/settings/theme_selection_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/home/brand_dashboard_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/auth/brand_signup_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/campaigns/add_campaign_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/campaigns/collaboration_center_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/campaigns/campaign_applicants_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/campaigns/manage_campaigns_screen.dart';
+// Brand wallet removed — brands pay per-campaign via Razorpay
+import 'package:aura_influencer_portfolio/features/brand/campaigns/campaign_payment_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/creators/creators_list_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/settings/brand_settings_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/profile/brand_profile_preview_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/campaigns/applicant_details_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/finance/transaction_history_screen.dart';
+import 'package:aura_influencer_portfolio/features/brand/campaigns/brand_deal_chat_screen.dart';
 import 'package:aura_influencer_portfolio/shared/utils/constants.dart';
 
 class AppRoutes {
@@ -59,6 +77,9 @@ class AppRoutes {
   static const String helpSupport = '/help-support';
   static const String socialLinks = '/social-links';
 
+  static const String privacySettings = '/privacy-settings';
+  static const String notificationSettings = '/notification-settings';
+
   static const String profileBento = '/profile-bento';
   static const String brandMarketplace = '/brand-marketplace';
   static const String campaignApply = '/campaign-apply';
@@ -67,6 +88,24 @@ class AppRoutes {
   static const String adminDashboard = '/admin-dashboard';
   static const String personalDetails = '/personal-details';
   static const String themeSelection = '/theme-selection';
+  static const String creatorCollaborations = '/creator/collaborations';
+  static const String creatorCollabDetails = '/creator/collab-details';
+
+  // Brand Routes
+  static const String brandDashboard = '/brand-dashboard';
+  static const String brandSignUp = '/brand-sign-up';
+  static const String addCampaign = '/add-campaign';
+  static const String manageCampaigns = '/manage-campaigns';
+  static const String creatorsList = '/creators-list';
+  // Brand wallet removed — brands pay per-campaign via Razorpay
+  static const String campaignPayment = '/campaign-payment';
+  static const String brandSettings = '/brand-settings';
+  static const String brandProfilePreview = '/brand-profile-preview';
+  static const String applicantDetails = '/applicant-details';
+  static const String campaignApplicants = '/brand/campaign-applicants';
+  static const String collaborationCenter = '/brand/collaboration-center';
+  static const String transactionHistory = '/transaction-history';
+  static const String brandDealChat = '/brand-deal-chat';
 }
 
 class AppRouter {
@@ -108,7 +147,8 @@ class AppRouter {
           const CreatorTypeSelectionScreen(),
         );
       case AppRoutes.basicProfileSetup:
-        final creatorType = settings.arguments as CreatorType? ?? CreatorType.independent;
+        final creatorType =
+            settings.arguments as CreatorType? ?? CreatorType.independent;
         return _buildPage(
           settings,
           BasicProfileSetupScreen(creatorType: creatorType),
@@ -180,11 +220,26 @@ class AppRouter {
           settings,
           const SocialLinksScreen(),
         );
-
-      case AppRoutes.profileBento:
+      case AppRoutes.privacySettings:
         return _buildPage(
           settings,
-          const ProfileBentoScreen(),
+          const PrivacySettingsScreen(),
+        );
+      case AppRoutes.notificationSettings:
+        return _buildPage(
+          settings,
+          const NotificationSettingsScreen(),
+        );
+
+      case AppRoutes.profileBento:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _buildPage(
+          settings,
+          ProfileBentoScreen(
+            isPublicView: args?['isPublicView'] ?? false,
+            customDisplayName: args?['customDisplayName'],
+            customHandle: args?['customHandle'],
+          ),
         );
       case AppRoutes.brandMarketplace:
         return _buildPage(
@@ -221,6 +276,103 @@ class AppRouter {
           settings,
           const ThemeSelectionScreen(),
         );
+      case AppRoutes.creatorCollaborations:
+        return _buildPage(
+          settings,
+          const CreatorCollaborationsScreen(),
+        );
+      case AppRoutes.creatorCollabDetails:
+        return _buildPage(
+          settings,
+          const CreatorCollabDetailsScreen(),
+        );
+
+      // Brand Cases
+      case AppRoutes.brandDashboard:
+        return _buildPage(
+          settings,
+          const BrandDashboardScreen(),
+        );
+      case AppRoutes.brandSignUp:
+        return _buildPage(
+          settings,
+          const BrandSignupScreen(),
+        );
+      case AppRoutes.addCampaign:
+        return _buildPage(
+          settings,
+          const AddCampaignScreen(),
+        );
+      case AppRoutes.manageCampaigns:
+        return _buildPage(
+          settings,
+          const ManageCampaignsScreen(),
+        );
+      // Brand wallet removed — brands pay per-campaign via Razorpay
+      case AppRoutes.campaignPayment:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _buildPage(
+          settings,
+          CampaignPaymentScreen(
+            campaignTitle: args?['campaignTitle'] ?? 'Campaign Name',
+            creatorName: args?['creatorName'] ?? 'Creator Name',
+            creatorHandle: args?['creatorHandle'] ?? '@handle',
+            proposedRate: args?['proposedRate'] ?? '₹0',
+          ),
+        );
+      case AppRoutes.creatorsList:
+        return _buildPage(
+          settings,
+          const CreatorsListScreen(),
+        );
+      case AppRoutes.brandSettings:
+        return _buildPage(
+          settings,
+          const BrandSettingsScreen(),
+        );
+      case AppRoutes.brandProfilePreview:
+        return _buildPage(
+          settings,
+          const BrandProfilePreviewScreen(),
+        );
+      case AppRoutes.applicantDetails:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _buildPage(
+          settings,
+          ApplicantDetailsScreen(
+            creatorName: args?['creatorName'] ?? 'Unknown Creator',
+            proposedRate: args?['proposedRate'] ?? '₹0',
+            campaignTitle: args?['campaignTitle'] ?? '',
+          ),
+        );
+      case AppRoutes.campaignApplicants:
+        return _buildPage(
+          settings,
+          const CampaignApplicantsScreen(),
+        );
+      case AppRoutes.collaborationCenter:
+        return _buildPage(
+          settings,
+          const CollaborationCenterScreen(),
+        );
+      case AppRoutes.transactionHistory:
+        return _buildPage(
+          settings,
+          const TransactionHistoryScreen(),
+        );
+      case AppRoutes.brandDealChat:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return _buildPage(
+          settings,
+          BrandDealChatScreen(
+            creatorName: args?['creatorName'] ?? 'Sohail',
+            creatorHandle: args?['creatorHandle'] ?? '@sohail.creates',
+            campaignTitle: args?['campaignTitle'] ?? 'Summer Skincare Launch',
+            dealAmount: args?['dealAmount'] ?? '₹35,000',
+          ),
+        );
+      // Other brand placeholders will go here as implemented
+
       default:
         return _buildPage(
           settings,
